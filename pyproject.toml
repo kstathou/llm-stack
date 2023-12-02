@@ -99,7 +99,7 @@ select = [
   "B", # bugbear errors
   "ANN", # flake8 annotations errors
   "T", # flake8 print errors
-  # "D", # flake8 doscstrings errors
+  "D", # flake8 doscstrings errors
   ]
 
 ignore = [
