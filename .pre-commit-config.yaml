@@ -26,52 +26,24 @@ repos:
       - id: check-shebang-scripts-are-executable
         stages: [commit]
 
-  # - repo: https://github.com/astral-sh/ruff-pre-commit
-  #   # Ruff version.
-  #   rev: v0.1.6
-  #   hooks:
-  #     # Run the linter.
-  #     - id: ruff
-  #       args: [ --fix ]
-  #     # Run the formatter.
-  #     - id: ruff-format
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.1.6
+    hooks:
+      # Run the linter.
+      - id: ruff
+        args: [--fix]
+      # Run the formatter.
+      - id: ruff-format
 
   - repo: local
     hooks:
-      - id: ruff-fix
-        name: Run Ruff fix
-        entry: poetry run ruff check --fix .
-        language: system
-        types: [file, python]
-        stages: [commit]
-
-      - id: ruff-format
-        name: Run Ruff format
-        entry: poetry run ruff format .
-        language: system
-        types: [file, python]
-        stages: [commit]
-
-      # - id: black
-      #   name: Run Black
-      #   entry: poetry run black
-      #   language: system
-      #   types: [file, python]
-      #   stages: [commit]
-
       - id: isort
         name: Run Isort
         entry: poetry run isort
         language: system
         types: [file, python]
         stages: [commit]
-
-      # - id: flake8
-      #   name: Run Flake8
-      #   entry: poetry run pflake8
-      #   language: system
-      #   types: [file, python]
-      #   stages: [commit]
 
       - id: yamllint
         name: Run Yamllint
