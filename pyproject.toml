@@ -1,0 +1,179 @@
+[tool.poetry]
+authors = ["kstathou"]
+description = "Experiments with Large Language Models (LLMs). Fine-tune Mistral."
+homepage = "https://github.com/kstathou/llm-stack"
+keywords = ['package', 'python', 'machine-learning'] # noqa
+name = "llm-stack"
+packages = [
+  {include = "llm_stack", from = "src"},
+]
+readme = "README.md"
+repository = "https://github.com/kstathou/llm-stack"
+version = "0.1.0"
+
+[tool.poetry.build]
+generate-setup-file = false
+
+[tool.poetry.dependencies]
+python = "3.11.5"
+datasets = "^2.15.0"
+transformers = "^4.35.2"
+modal = "^0.55.4147"
+peft = "^0.6.2"
+evaluate = "^0.4.1"
+bitsandbytes = "^0.41.2.post2"
+wandb = "^0.16.0"
+accelerate = "^0.24.1"
+torch = "2.0.1"
+
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.1.1" # Allows for testing of the project
+pytest-cov = "^4.0.0" # Allows to run coverage of the project
+
+[tool.poetry.group.lint]
+optional = true
+
+[tool.poetry.group.lint.dependencies]
+bandit = {version = "^1.7.4", extras = ["toml"]}# Security linter
+ruff = "^0.1.6" # black + flake8 + isort
+pre-commit = "^2.18.1" # Runs a pipeline before commiting code
+yamllint = "^1.26.3" # Linter for YAML files
+isort = "^5.10.1" # Sort imports
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.23.3"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.2.0rc1"]
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    ".env",
+]
+
+# Same as Black.
+line-length = 119
+indent-width = 4
+
+# Assume Python 3.11
+target-version = "py311"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = [
+  "C", # McCabe complexity
+  "E", # pep8 errors
+  "W", # pep8 warnings
+  "F", # pyflakes errors
+  "N", # naming conventions
+  "B", # bugbear errors
+  "ANN", # flake8 annotations errors
+  "T", # flake8 print errors
+  "D", # flake8 doscstrings errors
+  ]
+
+ignore = [
+  "D213", # Multi-line docstring summary should start at the first line
+  "D203", # one-blank-line-before-class
+  "E501", # Line too long  (using B950 instead, which has 10% tolerance)
+  "D107", # Missing docstring in __init__
+  "D202", # No blank lines allowed after function docstring
+  "D400", # First line should end with a period
+  "D100", # Missing docstring in public module
+  "D104", # Missing docstring in public package
+  "ANN003", # Missing type annotation for **kwargs
+  "ANN002", # Missing type annotation for **args
+  "ANN1", # Missing type annotation for self in method or cls method
+  "ANN101", # Missing type annotation for class method
+  ]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[tool.isort]
+combine_as_imports = true
+force_single_line = true
+line_length = 119
+lines_after_imports = 2
+lines_between_types = 1
+profile = 'black'
+src_paths = ["src", "tests"]
+
+[tool.bandit]
+exclude_dirs = [
+  ".venv",
+  "cdk.out",
+]
+skips = [
+  # Choose the bandit errors to ignore globally
+  "B101", # Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+  "B311", # Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+  "B608", # Possible SQL injection vector through string-based query construction.
+]
+
+[tool.pytest.ini_options]
+addopts = """
+  --verbose
+  --color=yes
+  --assert=plain
+  --cov-report term
+  --cov=src
+  --last-failed
+"""
+minversion = "7.1"
+testpaths = [
+  "tests",
+]
+
+[tool.coverage.run]
+omit = ["*/tests/*"] # Remove test files from coverage run.
+
+[tool.coverage.report]
+omit = ["*/tests/*"] # Remove test files from coverage report.
