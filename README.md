@@ -22,5 +22,3 @@ TODO
 ## Contributing
 
 TODO
-
-## 
