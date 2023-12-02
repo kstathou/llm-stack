@@ -1,0 +1,10 @@
+---
+name: Run Lint
+description: Run linters to verify code quality. Credits to Andre Sionek for writing the original GitHub Action.
+
+runs:
+  using: "composite"
+  steps:
+    - name: Lint
+      shell: bash
+      run: poetry run pre-commit run --all-files
