@@ -5,6 +5,8 @@ class Data:
     """Process data.
 
     Yes a long one.
+
+
     """
 
     def __init__(self, data: str) -> None:
