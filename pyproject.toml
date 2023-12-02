@@ -91,19 +91,20 @@ target-version = "py311"
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
 select = [
-  # Choose the flake8 errors to select globally here
   "C", # McCabe complexity
   "E", # pep8 errors
   "W", # pep8 warnings
   "F", # pyflakes errors
   "N", # naming conventions
-  "B", # bugbear errors (needs plugin installed)
-  "ANN", # flake8 annotations errors (needs plugin installed)
-  "T", # flake8 print errors (needs plugin installed)
-  "D", # flake8 doscstrings errors (needs plugin installed)
+  "B", # bugbear errors
+  "ANN", # flake8 annotations errors
+  "T", # flake8 print errors
+  # "D", # flake8 doscstrings errors
   ]
 
 ignore = [
+  "D213", # Multi-line docstring summary should start at the first line
+  "D203", # one-blank-line-before-class
   "E501", # Line too long  (using B950 instead, which has 10% tolerance)
   "D107", # Missing docstring in __init__
   "D202", # No blank lines allowed after function docstring
