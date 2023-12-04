@@ -59,16 +59,8 @@ class WandbRun:
         return self.run.id
 
 
-class ArtifactWriter(WandbRun):
-    """Write an artifact to wandb.
-
-    Types of artifacts:
-    - Data (raw data, training, validation, test, metrics)
-    - ML Model checkpoints
-
-    For now, it's a glorified wrapper of the wandb API.
-
-    """
+class ArtifactHandler(WandbRun):
+    """Read and write artifacts stored in wandb."""
 
     def __init__(self, project: str, job_type: str, **kwargs) -> None:
         super().__init__(project, job_type, **kwargs)
@@ -127,13 +119,6 @@ class ArtifactWriter(WandbRun):
         artifact.add_file(local_path=local_path)
 
         self.run.log_artifact(artifact)
-
-
-class ArtifactReader(WandbRun):
-    """Read an artifact that has been stored wandb."""
-
-    def __init__(self, project: str, job_type: str, **kwargs) -> None:
-        super().__init__(project, job_type, **kwargs)
 
     def read_artifact(
         self,
