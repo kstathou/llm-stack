@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 import feedparser
 import pandas as pd
@@ -100,7 +101,7 @@ class ArxivAPI:
         return response
 
     @staticmethod
-    def _construct_query(query: str, fields: list[str] = None) -> str:
+    def _construct_query(query: str, fields: Optional[list] = None) -> str:
         """Construct query string for arXiv API."""
         if fields is None:
             fields = ["all"]
@@ -132,12 +133,12 @@ class ArxivAPI:
             raise ValueError("No entries found in feed.") from e
 
     @staticmethod
-    def _parse_entry(entry: feedparser.util.FeedParserDict) -> dict[str, str]:
+    def _parse_entry(entry: feedparser.util.FeedParserDict) -> dict:
         """Parse entry from arXiv API feed."""
         return {
             "arxiv_url": entry["id"],
-            "title": entry["title"],
-            "summary": entry["summary"],
+            "title": entry["title"].replace("\n", " "),
+            "abstract": entry["summary"].replace("\n", " "),
             "published": datetime.strftime(parser.parse(entry["published"]), "%Y-%m-%d"),
             "pdf_url": [item["href"] for item in entry["links"] if all(w in item["href"] for w in ["arxiv", "pdf"])][
                 0

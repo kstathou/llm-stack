@@ -48,15 +48,17 @@ class WandbRun:
             self.job_type = job_type
             self.project = project
 
+        assert self.run
+
     @property
     def name(self) -> str:
         """Return the run name."""
-        return self.run.name
+        return self.run.name  # type: ignore
 
     @property
     def id(self) -> str:
         """Return the run ID."""
-        return self.run.id
+        return self.run.id  # type: ignore
 
 
 class ArtifactHandler(WandbRun):
@@ -118,7 +120,7 @@ class ArtifactHandler(WandbRun):
         # Add a file
         artifact.add_file(local_path=local_path)
 
-        self.run.log_artifact(artifact)
+        self.run.log_artifact(artifact)  # type: ignore
 
     def read_artifact(
         self,
@@ -166,7 +168,7 @@ class ArtifactHandler(WandbRun):
         name: str,
         version: str = "latest",
     ) -> str:
-        artifact = self.run.use_artifact(f"{name}:{version}")
+        artifact = self.run.use_artifact(f"{name}:{version}")  # type: ignore
 
         # Download locally
         file = artifact.download()
