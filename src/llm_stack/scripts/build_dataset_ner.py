@@ -13,7 +13,6 @@ image = (
 # Imports shared across functions
 with image.run_inside():
     import asyncio
-    import logging
     import os
 
     import pandas as pd
@@ -98,7 +97,6 @@ async def annotate_dataset_with_open_ai(
         messages = [
             system_message.to_prompt(),
             user_message.to_prompt(text=tup.abstract),
-            # formatting_message,
         ]
         tasks.append(
             openai_llm.generate(
@@ -146,8 +144,8 @@ async def main(
     local_data_path_ner_openai: str = "preprints_openai_ner.parquet",
 ) -> None:
     """Build an NER dataset using arXiv's papers and OpenAI's LLMs."""
-    logging.info("Fetching arXiv data...")
+    # Fetching the arXiv data
     fetch_arxiv_data.remote(local_data_path=local_data_path_raw)
 
-    logging.info("NER with OpenAI...")
+    # NER with OpenAI
     annotate_dataset_with_open_ai.remote(local_data_path=local_data_path_ner_openai)
