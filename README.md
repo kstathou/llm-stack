@@ -25,6 +25,10 @@ How to:
 
 In this tutorial, we will use GPT-3.5 to generate a training set for our entity recognition task.
 
+```python
+modal run src/llm_stack/scripts/build_dataset_ner.py
+```
+
 ## Contributing
 
 Found any mistakes or want to contribute? Feel free to open a PR or an issue.
