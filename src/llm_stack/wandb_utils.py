@@ -12,6 +12,7 @@ class WandbTypes:
     process_data_job: str = "process_data"
     train_model_job: str = "model"
     evaluate_model_job: str = "evaluate_model"
+    inference_job: str = "inference"
 
     dataset_artifact: str = "dataset"
     model_artifact: str = "model"

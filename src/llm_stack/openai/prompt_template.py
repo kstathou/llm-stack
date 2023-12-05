@@ -143,3 +143,46 @@ class MessageTemplate(BasePromptTemplate):
         if instance.role == "function" and not instance.name:
             raise ValueError("The 'name' attribute is required when 'role' is 'function'.")
         return instance
+
+
+@dataclass
+class FunctionTemplate(BasePromptTemplate):
+    """Create a template for an OpenAI function."""
+
+    name: str
+    description: str
+    parameters: Dict[str, Union[str, Dict[str, Dict[str, Union[str, List[str]]]], List[str]]]
+
+    def _initialize_template(self) -> dict:
+        return {
+            "type": "function",
+            "function": {
+                "name": self.name,
+                "description": self.description,
+                "parameters": self.parameters,
+            },
+        }
+
+    @staticmethod
+    def _from_dict(data: Dict) -> "FunctionTemplate":
+        """Create a Template instance from a dictionary."""
+        try:
+            return FunctionTemplate(**data["function"])
+        except TypeError as e:
+            raise TypeError("Expected a dictionary with a 'function' key.") from e
+
+    def to_prompt(
+        self,
+        exclude: Optional[List[str]] = ["initial_template"],  # noqa: B006
+    ) -> Dict:
+        """Convert a Template instance to a JSON string."""
+        # Custom formatting for the output
+        formatted_data = {
+            "type": "function",
+            "function": {
+                "name": self.name,
+                "description": self.description,
+                "parameters": self.parameters,
+            },
+        }
+        return self._exclude_keys(formatted_data, exclude=exclude)

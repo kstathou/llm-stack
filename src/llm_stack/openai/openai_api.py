@@ -128,35 +128,13 @@ class OpenAILLM:
             **openai_kwargs,
         )
 
-        response = response.choices[0].message  # type: ignore
-
-        if extra:
-            try:
-                response = await self._parse_json(response.content)
-                if response:
-                    response.update(extra)
-                    return response
-            except json.JSONDecodeError as e:
-                logger.error(f"Invalid JSON: Error: {str(e)}")
-                return {}
-
-        return response.content  # type: ignore
-
-    @staticmethod
-    async def _try_parse_json(item: str) -> Union[dict, None]:
         try:
-            return json.loads(item)
+            response = json.loads(response.choices[0].message.tool_calls[0].function.arguments)  # type: ignore
+            response.update({"id": extra["id"]})
+            return response
         except json.JSONDecodeError as e:
-            return e
-
-    async def _parse_json(self, item: str) -> Union[dict, None]:
-        result = await self._try_parse_json(item.replace("'", '"'))
-        if isinstance(result, json.JSONDecodeError):
-            result = await self._try_parse_json(item)
-            if isinstance(result, json.JSONDecodeError):
-                logging.error(f"Invalid JSON: Error: {str(result)}")
-                return None
-        return result
+            logger.error(f"Invalid JSON: Error: {str(e)}")
+            return {}
 
     @retry(
         retry(
