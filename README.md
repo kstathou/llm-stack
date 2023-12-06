@@ -2,7 +2,7 @@
 
 This tutorial series will show you how to build an end-to-end data flywheel for Large Language Models (LLMs).
 
-We will be working on an entity recognition task with a custom set of entity types throughout the series. We will extract entities like `dataset`, `method`, `evaluation` and `task` from arXiv papers.
+We will be summarising arXiv abstracts.
 
 ## What you will learn
 
@@ -23,10 +23,10 @@ How to:
 
 ## Tutorial 1 - Generating a training set with GPT-3.5
 
-In this tutorial, we will use GPT-3.5 to generate a training set for our entity recognition task.
+In this tutorial, we will use GPT-3.5 to generate a training set for summarisation task.
 
 ```python
-modal run src/llm_stack/scripts/build_dataset_ner.py
+modal run src/llm_stack/scripts/build_dataset_summaries.py
 ```
 
 ## Contributing

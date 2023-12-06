@@ -1,4 +1,3 @@
-import json
 import logging
 
 from typing import Optional
@@ -128,13 +127,12 @@ class OpenAILLM:
             **openai_kwargs,
         )
 
-        try:
-            response = json.loads(response.choices[0].message.tool_calls[0].function.arguments)  # type: ignore
-            response.update({"id": extra["id"]})
-            return response
-        except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON: Error: {str(e)}")
-            return {}
+        response = response.choices[0].message
+
+        if extra:
+            return {"response": response.content, **extra}
+
+        return response
 
     @retry(
         retry(

@@ -20,14 +20,13 @@ with image.run_inside():
     from tqdm import tqdm
 
     from llm_stack.build_dataset import ArxivAPI
-    from llm_stack.openai import FunctionTemplate
     from llm_stack.openai import MessageTemplate
     from llm_stack.openai import OpenAILLM
     from llm_stack.wandb_utils import ArtifactHandler
     from llm_stack.wandb_utils import WandbTypes
 
 
-stub = Stub(name="build-ner-dataset-with-openai", image=image)
+stub = Stub(name="build-summaries-dataset-with-openai", image=image)
 
 
 @stub.function(secret=Secret.from_name("wandb-secret"))
@@ -37,7 +36,7 @@ def fetch_arxiv_data(
     query: str = "LLM,large language models,gpt",
     start_date: int = 20230101,
     end_date: int = 20231205,
-    max_results: int = 2000,
+    max_results: int = 4000,
 ) -> None:
     """Fetch arxiv data from the arxiv API."""
     handler = ArtifactHandler(project="llm-stack", job_type=WandbTypes.raw_data_job)
@@ -65,18 +64,17 @@ def fetch_arxiv_data(
 @stub.function(
     secrets=[Secret.from_name("wandb-secret"), Secret.from_name("openai-secret")],
     mounts=[Mount.from_local_dir("src/llm_stack/build_dataset/prompts", remote_path="/root/prompts")],
+    timeout=1500,
 )
 async def annotate_dataset_with_open_ai(
     local_data_path: str,
     raw_data_artifact: str = "arxiv-preprints",
-    annotated_artifact_name: str = "preprints-with-openai-ner",
+    annotated_artifact_name: str = "preprints-with-openai-summaries",
     model_name: str = "gpt-3.5-turbo-1106",
-    system_message_file: str = "openai_system.json",
-    user_message_file: str = "openai_ner.json",
-    function_file: str = "ner_function.json",
+    user_message_file: str = "openai_summarizer.json",
     timeout: int = 120,
 ) -> None:
-    """Run NER with OpenAI's LLMs."""
+    """Run the arXiv summarizer with OpenAI's LLMs."""
     handler = ArtifactHandler(project="llm-stack", job_type=WandbTypes.inference_job)
 
     preprints = handler.read_artifact(
@@ -84,29 +82,18 @@ async def annotate_dataset_with_open_ai(
         artifact_type=WandbTypes.dataset_artifact,
     )
 
-    # Load all prompt templates
-    system_message = MessageTemplate.load(f"/root/prompts/{system_message_file}")
+    # Load prompt template and instantiate OpenAI model
     user_message = MessageTemplate.load(f"/root/prompts/{user_message_file}")
-    function = FunctionTemplate.load(f"/root/prompts/{function_file}")
-
     openai_llm = OpenAILLM(api_key=os.environ["OPENAI_API_KEY"], timeout=timeout)
 
     # Run the async tasks
     tasks = []
     for tup in preprints.itertuples():
-        messages = [
-            system_message.to_prompt(),
-            user_message.to_prompt(text=tup.abstract),
-        ]
+        messages = [user_message.to_prompt(text=tup.abstract)]
         tasks.append(
             openai_llm.generate(
                 messages=messages,
                 model=model_name,
-                tools=[function.to_prompt()],
-                tool_choice={
-                    "type": "function",
-                    "function": {"name": function.name},
-                },
                 extra={"id": tup.arxiv_url},
             )
         )
@@ -118,17 +105,9 @@ async def annotate_dataset_with_open_ai(
             predictions.append(result)
 
     # Save the predictions to wandb
-    arxiv_urls = []
-    entities = []
-    for d in predictions:
-        arxiv_urls.append(d["id"])
-        d.pop("id")
-        entities.append(d)
-
-    df = pd.DataFrame({"arxiv_url": arxiv_urls, "entities": entities})
-
-    cols = ["arxiv_url", "abstract", "entities"]
-    preprints = preprints.merge(df, on="arxiv_url")[cols]
+    predictions = pd.DataFrame(predictions)
+    cols = ["arxiv_url", "abstract", "response"]
+    preprints = preprints.merge(predictions, left_on="arxiv_url", right_on="id")[cols]
 
     handler.write_artifact(
         obj=preprints,
@@ -141,11 +120,11 @@ async def annotate_dataset_with_open_ai(
 @stub.local_entrypoint()
 async def main(
     local_data_path_raw: str = "arxiv_preprints.parquet",
-    local_data_path_ner_openai: str = "preprints_openai_ner.parquet",
+    local_data_path_openai: str = "preprints_openai_summaries.parquet",
 ) -> None:
     """Build an NER dataset using arXiv's papers and OpenAI's LLMs."""
-    # Fetching the arXiv data
+    # # Fetching the arXiv data
     fetch_arxiv_data.remote(local_data_path=local_data_path_raw)
 
-    # NER with OpenAI
-    annotate_dataset_with_open_ai.remote(local_data_path=local_data_path_ner_openai)
+    # Summarisation with OpenAI
+    annotate_dataset_with_open_ai.remote(local_data_path=local_data_path_openai)
